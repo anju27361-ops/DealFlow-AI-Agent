@@ -1,0 +1,55 @@
+"""Agent API schemas."""
+from __future__ import annotations
+
+from typing import Any
+
+from pydantic import BaseModel, Field
+
+
+class ReviewOpportunityRequest(BaseModel):
+    opportunity_id: str = Field(..., examples=["OPP-1001"])
+    task: str = Field(
+        default="Review this opportunity, identify blockers, summarize client history, "
+        "and recommend next steps.",
+    )
+
+
+class AgentTaskResponse(BaseModel):
+    task_id: str
+    opportunity_id: str | None = None
+    account_id: str | None = None
+    execution_status: str
+    approval_status: str
+    requires_human_approval: bool
+    risk_score: float | None = None
+    risk_flags: list[dict[str, Any]] = []
+    missing_fields: list[str] = []
+    recommended_actions: list[str] = []
+    crm_update_draft: dict[str, Any] = {}
+    final_report: dict[str, Any] = {}
+    audit_log: list[dict[str, Any]] = []
+    error: str | None = None
+
+
+class ApprovalRequest(BaseModel):
+    approver: str = Field(default="human")
+    reason: str = Field(default="")
+
+
+class TraceStep(BaseModel):
+    step: int
+    node_name: str
+    status: str
+    duration_ms: float | None = None
+    input_summary: str | None = None
+    output_summary: str | None = None
+    error_message: str | None = None
+    timestamp: str | None = None
+
+
+class TraceResponse(BaseModel):
+    task_id: str
+    execution_status: str
+    approval_status: str
+    step_count: int
+    trace: list[TraceStep] = []
